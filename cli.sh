@@ -98,9 +98,7 @@ wp_install(){
 
 /usr/bin/mysql -e "grant all on $db_name.* to '$db_username'@'localhost'"
 
-		sleep 2;
 
-		echo "Granting Privileges.."
 
 /usr/bin/mysql -e "flush privileges"
 
@@ -130,9 +128,14 @@ wp_install(){
 
 		echo "Installing Wordpress.."
 
+	/usr/local/bin/wp core download
 		sleep 2;
 
-/usr/local/bin/wp core install --url=$site_url --title=$site_title --admin_user=$admin_user --admin_password=$admin_password --admin_email=$admin_email
+	/usr/local/bin/wp core config --dbuser=$db_username --dbname=$db_name --dbpass=$db_password
+
+		sleep 2;
+
+	/usr/local/bin/wp core install --url=$site_url --title=$site_title --admin_user=$admin_user --admin_password=$admin_password --admin_email=$admin_email
 
 }
 wp_update(){
