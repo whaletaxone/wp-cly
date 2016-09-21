@@ -70,7 +70,7 @@ init(){
 wp_install(){
 
 	
-		echo "\nThis Will Install Wordpress in the current working directory\n"
+		echo "\nThis Will Install the latest  Wordpress version\n in the current working directory\n"
 
 		echo "Enter Database name:\n"
 		read db_name
