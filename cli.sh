@@ -69,6 +69,9 @@ init(){
 
 wp_install(){
 
+	
+		echo "\nThis Will Install Wordpress in the current working directory\n"
+
 		echo "Enter Database name:\n"
 		read db_name
 
@@ -105,8 +108,33 @@ wp_install(){
 
 		echo "Privileges Granted"
 
-}
 
+		echo "Enter Wordpress Installation Details:\n"
+
+		echo "Site URL: "
+		read site_url
+
+		echo "Site Title: "
+		read site_title
+
+		echo "Admin Username: "
+		read admin_user
+
+		echo "Admin Password: "
+		read admin_password
+
+		echo "Admin Email Address: "
+		read admin_email
+
+		sleep 2;
+
+		echo "Installing Wordpress.."
+
+		sleep 2;
+
+/usr/local/bin/wp core install --url=$site_url --title=$site_title --admin_user=$admin_user --admin_password=$admin_password --admin_email=$admin_email
+
+}
 wp_update(){
 
 		echo "Update Function"
