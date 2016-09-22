@@ -140,7 +140,38 @@ wp_install(){
 }
 wp_update(){
 
-		echo "Update Function"
+		echo "Checking Update.."
+	
+	/usr/local/bin/wp core check-update | grep -i 'success' &> /dev/null
+		
+		if [ $? == 0 ]; then
+
+		echo "Success: WordPress is at the latest version."
+		init
+		else
+
+	wp_version=`/usr/local/bin/wp core version`
+	
+		echo "Outdated version detected\n "
+		echo "Detected Version $wp_version \n"
+		echo "Latest Available Version:\n"
+
+	/usr/local/bin/wp core check-update --major
+
+		echo "Update to Latest Version?\n"
+		echo "(1)Yes/(2)No\n"
+		read update_option
+
+		
+		if [ $update_option == 2 ]; then
+
+		init
+		else
+		
+		wp core update
+		
+		fi
+		fi
 }
 
 a_la_carte(){
