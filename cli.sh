@@ -1,10 +1,10 @@
 #!/bin/bash
-#
-# This is a bash wrapper for 
-#
+
+#####################################
+# This is a bash wrapper for wp-cli #
+#####################################
 
 echo='echo -e'
-
 
 ##################################
 # Check that wp-cli is installed #
@@ -12,14 +12,19 @@ echo='echo -e'
 
 check(){
 
-	if [ -f /usr/local/bin/wp ]; then
+	wp --info | grep -i "wp-cli version" &> /dev/null
+
+		if  [ $? == 0 ]; then
+		
 		clear
-		init	
-	else
-		clear
+		init
+
+		else
+
+		$echo "wp-cli isn't installed\n"
 		exit
-		$echo "wp-cli not present.  exiting."
-	fi
+		
+		fi
 }
 
 ####################
@@ -51,7 +56,6 @@ init(){
 		init
 	fi
 
-
 	if [ $init_option = "1" ]; then
 		clear
 		wp_install
@@ -76,8 +80,13 @@ init(){
 	fi
 }
 
-
 wp_install(){
+
+
+		$echo "\nEnter Root MySQL Password:\n "
+		read 'mypass'
+
+
 		$echo "What version?"
 		$echo "Latest(1)/Previous(2): "
 		read wp_install_version
@@ -91,7 +100,6 @@ wp_install(){
 		$echo "Which one? ex. 4.2 : "
 		read wp_install_version
 		fi
-
 	
 		$echo "\nThis Will Install the $wp_install_version Wordpress version\n in the current working directory\n"
 
@@ -104,26 +112,25 @@ wp_install(){
 		$echo "Enter MySQL User Password:\n"
 		read db_password
 
-
-/usr/bin/mysql -e "create database $db_name"
+/usr/bin/mysql -p$mypass -e "create database $db_name"
 
 		sleep 2;
 	
 		$echo "Created Database $db_name\n"
 
 
-/usr/bin/mysql -e "create user '$db_username'@'localhost' identified by '$db_password'"
+/usr/bin/mysql -p$mypass -e "create user '$db_username'@'localhost' identified by '$db_password'"
 
 		sleep 2;
 
 		$echo "Created MySQL User $db_username\n"
 
 
-/usr/bin/mysql -e "grant all on $db_name.* to '$db_username'@'localhost'"
+/usr/bin/mysql -p$mypass -e "grant all on $db_name.* to '$db_username'@'localhost'"
 
 
 
-/usr/bin/mysql -e "flush privileges"
+/usr/bin/mysql  -p$mypass -e "flush privileges"
 
 		sleep 2;
 
