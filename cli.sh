@@ -37,7 +37,7 @@ init(){
 		$echo "Select Option Below:\n"
 		$echo "  (1) Install Wordpress"
 		$echo "  (2) Update Wordpress"
-		$echo "  (3) A La Carte"
+		$echo "  (3) Vulnerability Scan"
 		$echo "  (4) Exit\n"
 		$echo -n "Select: "
 		read init_option
@@ -69,7 +69,7 @@ init(){
 
 	if [ $init_option = "3" ]; then
 		clear
-		a_la_carte
+		wpscan_func
 		
 	fi
 
@@ -252,10 +252,13 @@ current_version=`wp core version`
 fi
 }
 
+wpscan_func(){
 
-a_la_carte(){
+	wp_siteurl=`wp option get siteurl`
+	$echo "Starting WPScan Vulnerability Scan on $wp_siteurl...\n"
+       	ssh root@104.236.105.85 "cd /var/www/html/wpscan && ./wpscan.sh $wp_siteurl 2>&1"  
+     	
 
-		$echo "A La Carte Function"
+init
 }
-
 check
