@@ -286,15 +286,6 @@ wp plugin list | awk '{ print $2,$6}' | grep available &> /dev/null
 
 	fi
 
-#	for i in `wp plugin list | grep available | awk '{ print $2 }'`
-
-#	do
-	
-#	wp plugin update $i
-
-#	done
-#        init 
-	
 	else
 	$echo "All plugins up to date.\n"
 	wp plugin list
