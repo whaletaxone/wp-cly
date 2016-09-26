@@ -36,9 +36,10 @@ init(){
 		$echo "\nWP Cly\n"
 		$echo "Select Option Below:\n"
 		$echo "  (1) Install Wordpress"
-		$echo "  (2) Update Wordpress"
+		$echo "  (2) Update Wordpress (core)"
 		$echo "  (3) Vulnerability Scan"
-		$echo "  (4) Exit\n"
+		$echo "  (4) Update Plugins"
+		$echo "  (5) Exit\n"
 		$echo -n "Select: "
 		read init_option
 
@@ -50,7 +51,7 @@ init(){
 		$echo "You have selected $init_option"
 	fi
 
-	if ! [ $init_option -ge 1 -a $init_option -le 4 ]; then
+	if ! [ $init_option -ge 1 -a $init_option -le 5 ]; then
 		clear
 		$echo "Invalid option"
 		init
@@ -75,8 +76,12 @@ init(){
 
 	if [ $init_option = "4" ]; then
 		clear
+		wp_plugin_update_check
+	fi
+	
+	if [ $init_option = "5" ]; then
+		clear
 		exit
-
 	fi
 }
 
@@ -252,13 +257,80 @@ current_version=`wp core version`
 fi
 }
 
+wp_plugin_update_check(){
+
+	$echo "Checking Plugin Updates..\n"
+
+wp plugin list | awk '{ print $2,$6}' | grep available &> /dev/null
+
+	if [[ $? == 0 ]]; then	
+
+	$echo "Plugin(s) with Update Available\n" 
+
+	wp plugin list  | sed '/none/d'
+
+
+	$echo "Would you like to update outdated plugins?\n"
+	$echo "(y/n)"
+	
+	read pluginupopt
+
+	if [ $pluginupopt == y ]; then
+
+	wp_plugin_update
+		
+	else
+
+	clear
+	init
+
+	fi
+
+#	for i in `wp plugin list | grep available | awk '{ print $2 }'`
+
+#	do
+	
+#	wp plugin update $i
+
+#	done
+#        init 
+	
+	else
+	$echo "All plugins up to date.\n"
+	wp plugin list
+	init	
+	fi
+
+
+}
+
+wp_plugin_update(){
+
+
+        $echo "Updating Plugins..\n"
+
+        for i in `wp plugin list | grep available | awk '{ print $2 }'`
+
+        do
+
+        wp plugin update $i
+
+        done
+	
+	init
+}
+
 wpscan_func(){
 
 	wp_siteurl=`wp option get siteurl`
+	
 	$echo "Starting WPScan Vulnerability Scan on $wp_siteurl...\n"
        	ssh root@104.236.105.85 "cd /var/www/html/wpscan && ./wpscan.sh $wp_siteurl 2>&1"  
      	
 
 init
 }
+
+
+
 check
