@@ -4,7 +4,7 @@
 # This is a bash wrapper for wp-cli #
 #####################################
 
-echo='echo -e'
+		echo='echo -e'
 
 ##################################
 # Check that wp-cli is installed #
@@ -12,24 +12,24 @@ echo='echo -e'
 
 check(){
 
-	wp --info | grep -i "wp-cli version" &> /dev/null
+		wp --info | grep -i "wp-cli version" &> /dev/null
 
-		if  [ $? == 0 ]; then
+	if  [ $? == 0 ]; then
 		
 		clear
 		init
 
-		else
+	else
 
 		$echo "wp-cli isn't installed\n"
 		exit
 		
-		fi
+	fi
 }
 
-####################
-# Initial Function #
-####################
+###########################
+## Initial menu Function ##
+###########################
 
 init(){
 
@@ -85,26 +85,38 @@ init(){
 	fi
 }
 
+#####################################
+## Wordpress installation function ##
+#####################################
+
 wp_install(){
 
+	if [[ ( -f wp-config.php ) || ( -f wp-config-sample.php ) ]]; then
+		
+		$echo "\nWordpress looks to be installed in this directory\nExiting"
+		exit
+
+	fi
 
 		$echo "\nEnter Root MySQL Password:\n "
-		read 'mypass'
+		read -s 'mypass'
 
+		mysql="/usr/bin/mysql -p$mypass -e"
 
 		$echo "What version?"
 		$echo "Latest(1)/Previous(2): "
+		
 		read wp_install_version
 		
-		if [ $wp_install_version == 1 ]; then
+	if [ $wp_install_version == 1 ]; then
 
 		wp_install_version="latest"
 
-		else
+	else
 
 		$echo "Which one? ex. 4.2 : "
 		read wp_install_version
-		fi
+	fi
 	
 		$echo "\nThis Will Install the $wp_install_version Wordpress version\n in the current working directory\n"
 
@@ -117,26 +129,22 @@ wp_install(){
 		$echo "Enter MySQL User Password:\n"
 		read db_password
 
-/usr/bin/mysql -p$mypass -e "create database $db_name"
-
+		$mysql "create database $db_name"
 		sleep 2;
 	
 		$echo "Created Database $db_name\n"
 
 
-/usr/bin/mysql -p$mypass -e "create user '$db_username'@'localhost' identified by '$db_password'"
-
+		$mysql "create user '$db_username'@'localhost' identified by '$db_password'"
 		sleep 2;
 
 		$echo "Created MySQL User $db_username\n"
 
 
-/usr/bin/mysql -p$mypass -e "grant all on $db_name.* to '$db_username'@'localhost'"
+		$mysql "grant all on $db_name.* to '$db_username'@'localhost'"
 
 
-
-/usr/bin/mysql  -p$mypass -e "flush privileges"
-
+		$mysql "flush privileges"
 		sleep 2;
 
 		$echo "Privileges Granted"
@@ -163,165 +171,193 @@ wp_install(){
 
 		$echo "Installing Wordpress.."
 
-	/usr/local/bin/wp core download --version=$wp_install_version
+		wp core download --version=$wp_install_version
 		sleep 2;
 
-	/usr/local/bin/wp core config --dbuser=$db_username --dbname=$db_name --dbpass=$db_password
+		wp core config --dbuser=$db_username --dbname=$db_name --dbpass=$db_password
 
 		sleep 2;
 
-	/usr/local/bin/wp core install --url=$site_url --title="$site_title" --admin_user=$admin_user --admin_password=$admin_password --admin_email=$admin_email
+		wp core install --url=$site_url --title="$site_title" --admin_user=$admin_user --admin_password=$admin_password --admin_email=$admin_email
 
+		init
 }
+
+###########################################
+## Function to check major core updates ##
+###########################################
 
 wp_update_check(){
 
-wp core check-update --major | grep -i 'success' &> /dev/null
+		wp core check-update --major | grep -i 'success' &> /dev/null
 
        	if [[ $? == 0 ]]; then
 
-       	$echo "Major Version up to date"
-       	wp_update_check2
+       		$echo "Major Version up to date"
+       		wp_update_check2
         else
 
-       	$echo "Major Version not up to date"
-       	majorup="1"
-       	wp_update_major
+       		$echo "Major Version not up to date"
+       		majorup="1"
+       		wp_update_major
 
        	fi
 }
+
+##########################################
+## Function to check minor core updates ##
+##########################################
 
 wp_update_check2(){
 
-wp core check-update --minor | grep -i 'success' &> /dev/null
+		wp core check-update --minor | grep -i 'success' &> /dev/null
 
        	if [[ $? == 0 ]]; then
 
-       	$echo "Minor Version up to date"
-       	init
+       		$echo "Minor Version up to date"
+       		init
 
        	else
 
-       	$echo "Minor Version not up to date" ;
-       	minorup="1"
-       	wp_update_minor
+       		$echo "Minor Version not up to date" ;
+       		minorup="1"
+       		wp_update_minor
 
        	fi
 
 }
 
+###########################################
+## Function to perform major core update ##
+###########################################
+
 wp_update_major(){
 
-current_version=`wp core version`
+		current_version=`wp core version`
 
 
-       	wp core check-update --major
+       		wp core check-update --major
 
-       	$echo "Current installed version $current_version \n"
-       	$echo "Update to latest version?\n"
-       	$echo "y/n\n"
-       	read upanswer
+       		$echo "Current installed version $current_version \n"
+       		$echo "Update to latest version?\n"
+       		$echo "y/n\n"
+       		read upanswer
 
        	if [ $upanswer == "y" ]; then
 
-       	wp core update
+       		wp core update
 
        	else
 
-       	clear
-       	init
-fi
+       		clear
+       		init
+	fi
 }
+
+###########################################
+## Function to perform minor core update ##
+###########################################
 
 wp_update_minor(){
 
-current_version=`wp core version`
+		current_version=`wp core version`
 
 
-        wp core check-update --minor
+        	wp core check-update --minor
 
-        $echo "Current installed version: $current_version \n"
-        $echo "Update to latest version?\n"
-        $echo "y/n\n"
-        read upanswer
+       		$echo "Current installed version: $current_version \n"
+        	$echo "Update to latest version?\n"
+        	$echo "y/n\n"
+        	read upanswer
 
         if [ $upanswer == "y" ]; then
 
-        wp core update --minor
+        	wp core update --minor
 
 
         else
 
-        clear
-        init
-fi
+        	clear
+        	init
+	fi
 }
+
+################################################
+## Function to check available plugin updates ##
+################################################
 
 wp_plugin_update_check(){
 
-	$echo "Checking Plugin Updates..\n"
+		$echo "Checking Plugin Updates..\n"
 
-wp plugin list | awk '{ print $2,$6}' | grep available &> /dev/null
+		wp plugin list | awk '{ print $2,$6}' | grep available &> /dev/null
 
 	if [[ $? == 0 ]]; then	
 
-	$echo "Plugin(s) with Update Available\n" 
+		$echo "Plugin(s) with Update Available\n" 
 
-	wp plugin list  | sed '/none/d'
+		wp plugin list  | sed '/none/d'
 
 
-	$echo "Would you like to update outdated plugins?\n"
-	$echo "(y/n)"
+		$echo "Would you like to update outdated plugins?\n"
+		$echo "(y/n)"
 	
-	read pluginupopt
+		read pluginupopt
 
 	if [ $pluginupopt == y ]; then
 
-	wp_plugin_update
+		wp_plugin_update
 		
 	else
 
-	clear
-	init
+		clear
+		init
 
 	fi
 
 	else
-	$echo "All plugins up to date.\n"
-	wp plugin list
-	init	
+		$echo "All plugins up to date.\n"
+		wp plugin list
+		init	
 	fi
 
 
 }
+
+##############################################
+## Function to perform the plugin update(s) ##
+##############################################
 
 wp_plugin_update(){
 
 
-        $echo "Updating Plugins..\n"
+        	$echo "Updating Plugins..\n"
 
         for i in `wp plugin list | grep available | awk '{ print $2 }'`
 
         do
 
-        wp plugin update $i
+        	wp plugin update $i
 
         done
 	
-	init
+		init
 }
+
+################################################
+## Function to performm a WPScan on wp in cwd ##
+################################################
 
 wpscan_func(){
 
-	wp_siteurl=`wp option get siteurl`
+		wp_siteurl=`wp option get siteurl`
 	
-	$echo "Starting WPScan Vulnerability Scan on $wp_siteurl...\n"
-       	ssh root@104.236.105.85 "cd /var/www/html/wpscan && ./wpscan.sh $wp_siteurl 2>&1"  
+		$echo "Starting WPScan Vulnerability Scan on $wp_siteurl...\n"
+       		ssh root@104.236.105.85 "cd /var/www/html/wpscan && ./wpscan.sh $wp_siteurl 2>&1"  
      	
 
-init
+		init
 }
-
 
 
 check
